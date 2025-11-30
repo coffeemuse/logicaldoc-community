@@ -20,7 +20,7 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: 'maven'
-      - name: Configure Maven settings (Terracotta repo)
+      - name: Configure Maven settings (LogicalDOC & Terracotta repos)
         run: |
           mkdir -p ~/.m2
           cat > ~/.m2/settings.xml << 'EOF'
@@ -29,15 +29,21 @@ jobs:
                     xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
             <profiles>
               <profile>
-                <id>with-terracotta</id>
+                <id>with-extra-repos</id>
                 <repositories>
-                  <!-- Keep Central explicitly -->
+                  <!-- Maven Central -->
                   <repository>
                     <id>central</id>
                     <url>https://repo1.maven.org/maven2</url>
                   </repository>
 
-                  <!-- Terracotta repo for org.terracotta.internal:statistics etc. -->
+                  <!-- LogicalDOC repository (hosts the *-jakarta Jackrabbit artifacts, etc.) -->
+                  <repository>
+                    <id>logicaldoc</id>
+                    <url>https://logicaldoc.sourceforge.net/maven/</url>
+                  </repository>
+
+                  <!-- Terracotta repo (for org.terracotta.internal:statistics, etc.) -->
                   <repository>
                     <id>terracotta</id>
                     <url>https://repo.terracotta.org/maven2</url>
@@ -46,11 +52,10 @@ jobs:
               </profile>
             </profiles>
             <activeProfiles>
-              <activeProfile>with-terracotta</activeProfile>
+              <activeProfile>with-extra-repos</activeProfile>
             </activeProfiles>
           </settings>
           EOF
-
       # Build all modules from the root pom.xml
       - name: Maven install (all modules)
         run: mvn -B -ntp -DskipTests install
