@@ -21,21 +21,16 @@ jobs:
           java-version: '21'
           cache: 'maven'
 
-      # This mirrors the README build instructions:
-      #   cd build/poms && mvn clean install
-      - name: Build parent POMs
-        run: mvn -B -ntp -f build/poms/pom.xml clean install
+      # Build all modules from the root pom.xml
+      - name: Maven install (all modules)
+        run: mvn -B -ntp -DskipTests install
 
-      #   cd ../../community/logicaldoc && mvn clean package
-      - name: Build LogicalDOC community webapp
-        run: mvn -B -ntp -f community/logicaldoc/pom.xml clean package
+      # Build just the webapp WAR (and its deps) if you want a deployable artifact
+      - name: Build LogicalDOC webapp
+        run: mvn -B -ntp -pl logicaldoc-webapp -am -DskipTests package
 
-      # Optional: upload build artifacts (adjust paths if needed)
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: logicaldoc-build
-          path: |
-            community/logicaldoc/**/target/*.war
-            community/logicaldoc/**/target/*.zip
-            community/logicaldoc/**/target/*.jar
+          name: logicaldoc-webapp
+          path: logicaldoc-webapp/target/*.war
